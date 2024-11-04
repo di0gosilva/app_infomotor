@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:infomotor/loginpage.dart';
+import 'package:infomotor/menupage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,12 +12,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // home: const MyHomePage(),
       initialRoute: '/',
       theme: ThemeData(
           scaffoldBackgroundColor: const Color.fromARGB(255, 20, 20, 20)),
       routes: {
         '/': (context) => const LoginPage(),
+        '/menupage': (context) => const MenuPage(),
       },
       debugShowCheckedModeBanner: false,
     );

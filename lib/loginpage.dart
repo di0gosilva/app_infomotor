@@ -27,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   void validarLogin() {
     setState(() {
       if (user.text == userLogin && password.text == passwordLogin) {
-        Navigator.pushNamed(context, '/mainPage');
+        Navigator.pushNamed(context, '/menupage');
       } else {
         result = "Erro! Suas credenciais estão incorretas.";
       }
@@ -51,16 +51,16 @@ class _LoginPageState extends State<LoginPage> {
             Padding(
               padding: EdgeInsets.only(left: 0), // Ajusta o padding à esquerda
               child: IconButton(
-                icon: Icon(
-                  Icons.fastfood_rounded,
+                icon: ImageIcon(
+                  AssetImage('assets/logo.png'),
                   color: Colors.white,
-                  size: 30,
+                  size: 28, // ajuste o tamanho conforme necessário
                 ),
                 onPressed: null,
               ),
             ),
             Text(
-              "CALORIAS",
+              "INFO MOTOR",
               style: TextStyle(color: Colors.white, fontSize: 24),
             ),
             Padding(
@@ -104,7 +104,7 @@ class _LoginPageState extends State<LoginPage> {
                         return null;
                       },
                       decoration: InputDecoration(
-                        labelText: "Usuário",
+                        labelText: "Matrícula",
                         labelStyle:
                             const TextStyle(color: Colors.white, fontSize: 18),
                         filled: true,
