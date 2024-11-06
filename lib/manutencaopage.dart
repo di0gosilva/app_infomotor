@@ -177,6 +177,159 @@ class _ManutencaoPageState extends State<ManutencaoPage> {
           ],
         ),
       ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(
+                height: 15,
+              ),
+              const Text(
+                'Status do Braço Robótico',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 32),
+              // Status widgets
+              const StatusCard(
+                title: 'Linha de Montagem',
+                hours: 10,
+                color: Colors.green,
+              ),
+              const SizedBox(height: 32),
+              const StatusCard(
+                title: 'Pintura',
+                hours: 36,
+                color: Colors.green,
+              ),
+              const SizedBox(height: 32),
+              const StatusCard(
+                title: 'Montagem Final',
+                hours: 10,
+                color: Colors.green,
+              ),
+              const SizedBox(height: 32),
+              // Report generation section
+              const Text(
+                'Gerar Relatório',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 32),
+              TextField(
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color.fromARGB(255, 33, 33, 33),
+                  hintText: 'Data Inicial',
+                  hintStyle: const TextStyle(color: Colors.white),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color.fromARGB(255, 33, 33, 33),
+                  hintText: 'Data Final',
+                  hintStyle: const TextStyle(color: Colors.white),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 32),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 33, 33, 33),
+                    foregroundColor: Colors.white,
+                    side: const BorderSide(color: Colors.white),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                          5), // Ajuste o valor para o desejado
+                    ),
+                  ),
+                  child: const Text(
+                    'Exibir Relatório',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class StatusCard extends StatelessWidget {
+  final String title;
+  final int hours;
+  final Color color;
+
+  const StatusCard({
+    super.key,
+    required this.title,
+    required this.hours,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 33, 33, 33),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          LinearProgressIndicator(
+            value: hours / 36,
+            color: color,
+            backgroundColor: Colors.grey[700],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Total horas em funcionamento: $hours horas',
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
