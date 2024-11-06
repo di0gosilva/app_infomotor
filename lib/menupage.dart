@@ -181,40 +181,40 @@ class _MenuPageState extends State<MenuPage> {
       //     ],
       //   ),
       // ),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(80),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: AppBar(
-            backgroundColor: const Color.fromARGB(255, 20, 20, 20),
-            title: const Text(
-              'INFO MOTOR',
-              style: TextStyle(fontSize: 24, color: Colors.white),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 20, 20, 20),
+        title: const Text(
+          'INFO MOTOR',
+          style: TextStyle(fontSize: 24, color: Colors.white),
+        ),
+        centerTitle: true,
+        leading: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 0, 0, 0),
+          child: IconButton(
+            icon: const ImageIcon(
+              AssetImage('assets/logo.png'),
+              color: Colors.white,
+              size: 28,
             ),
-            centerTitle: true,
-            leading: IconButton(
-              icon: const ImageIcon(
-                AssetImage('assets/logo.png'),
-                color: Colors.white,
-                size: 28,
-              ),
-              onPressed: () {
-                // Ação ao clicar no ícone de logo, se necessário
-              },
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.menu),
-                color: Colors.white,
-                iconSize: 30,
-                onPressed: () {
-                  // Abre o drawer manualmente
-                  _scaffoldKey.currentState?.openEndDrawer();
-                },
-              ),
-            ],
+            onPressed: () {
+              // Ação ao clicar no ícone de logo, se necessário
+            },
           ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 15, 0),
+            child: IconButton(
+              icon: const Icon(Icons.menu),
+              color: Colors.white,
+              iconSize: 30,
+              onPressed: () {
+                // Abre o drawer manualmente
+                _scaffoldKey.currentState?.openEndDrawer();
+              },
+            ),
+          ),
+        ],
       ),
       endDrawer: Drawer(
         backgroundColor: const Color.fromARGB(255, 33, 33, 33),
@@ -240,7 +240,7 @@ class _MenuPageState extends State<MenuPage> {
               selected: _selectedIndex == 0,
               onTap: () {
                 _onItemTapped(0);
-                Navigator.pop(context);
+                Navigator.pushNamed(context, '/menupage');
               },
             ),
             ListTile(
@@ -255,7 +255,7 @@ class _MenuPageState extends State<MenuPage> {
               selected: _selectedIndex == 1,
               onTap: () {
                 _onItemTapped(1);
-                Navigator.pushNamed(context, '/menupage');
+                Navigator.pushNamed(context, '/estoque');
               },
             ),
             ListTile(
@@ -270,7 +270,7 @@ class _MenuPageState extends State<MenuPage> {
               selected: _selectedIndex == 1,
               onTap: () {
                 _onItemTapped(1);
-                Navigator.pushNamed(context, '/menupage');
+                Navigator.pushNamed(context, '/producao');
               },
             ),
             ListTile(
@@ -285,7 +285,7 @@ class _MenuPageState extends State<MenuPage> {
               selected: _selectedIndex == 1,
               onTap: () {
                 _onItemTapped(1);
-                Navigator.pushNamed(context, '/menupage');
+                Navigator.pushNamed(context, '/manutencao');
               },
             ),
             ListTile(
@@ -300,7 +300,7 @@ class _MenuPageState extends State<MenuPage> {
               selected: _selectedIndex == 1,
               onTap: () {
                 _onItemTapped(1);
-                Navigator.pushNamed(context, '/menupage');
+                Navigator.pushNamed(context, '/qualidade');
               },
             ),
             ListTile(
@@ -315,7 +315,7 @@ class _MenuPageState extends State<MenuPage> {
               selected: _selectedIndex == 1,
               onTap: () {
                 _onItemTapped(1);
-                Navigator.pushNamed(context, '/menupage');
+                Navigator.pushNamed(context, '/funcionarios');
               },
             ),
             ListTile(
@@ -330,67 +330,73 @@ class _MenuPageState extends State<MenuPage> {
               selected: _selectedIndex == 2,
               onTap: () {
                 _onItemTapped(2);
-                Navigator.pushNamed(context, '/menupage');
+                Navigator.pushNamed(context, '/');
               },
             ),
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          // mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 5),
-            SectorCard(
-              icon: const ImageIcon(
-                AssetImage('assets/estoque.png'),
-                color: Colors.white,
-                size: 95,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            // mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 5),
+              SectorCard(
+                icon: const ImageIcon(
+                  AssetImage('assets/estoque.png'),
+                  color: Colors.white,
+                  size: 95,
+                ),
+                label: 'Estoque',
+                onTap: () {
+                  _onItemTapped(1);
+                  Navigator.pushNamed(context, '/estoque');
+                },
               ),
-              label: 'Estoque',
-              onTap: () {
-                // Ação ao clicar no card de Estoque
-              },
-            ),
-            const SizedBox(height: 32),
-            SectorCard(
-              icon: const ImageIcon(
-                AssetImage('assets/producao.png'),
-                color: Colors.white,
-                size: 95,
+              const SizedBox(height: 32),
+              SectorCard(
+                icon: const ImageIcon(
+                  AssetImage('assets/producao.png'),
+                  color: Colors.white,
+                  size: 95,
+                ),
+                label: 'Produção',
+                onTap: () {
+                  _onItemTapped(1);
+                  Navigator.pushNamed(context, '/producao');
+                },
               ),
-              label: 'Produção',
-              onTap: () {
-                // Ação ao clicar no card de Estoque
-              },
-            ),
-            const SizedBox(height: 32),
-            SectorCard(
-              icon: const ImageIcon(
-                AssetImage('assets/manutencao.png'),
-                color: Colors.white,
-                size: 95,
+              const SizedBox(height: 32),
+              SectorCard(
+                icon: const ImageIcon(
+                  AssetImage('assets/manutencao.png'),
+                  color: Colors.white,
+                  size: 95,
+                ),
+                label: 'Manutenção',
+                onTap: () {
+                  _onItemTapped(1);
+                  Navigator.pushNamed(context, '/manutencao');
+                },
               ),
-              label: 'Manutenção',
-              onTap: () {
-                // Ação ao clicar no card de Estoque
-              },
-            ),
-            const SizedBox(height: 32),
-            SectorCard(
-              icon: const ImageIcon(
-                AssetImage('assets/qualidade.png'),
-                color: Colors.white,
-                size: 95,
+              const SizedBox(height: 32),
+              SectorCard(
+                icon: const ImageIcon(
+                  AssetImage('assets/qualidade.png'),
+                  color: Colors.white,
+                  size: 95,
+                ),
+                label: 'Qualidade',
+                onTap: () {
+                  _onItemTapped(1);
+                  Navigator.pushNamed(context, '/qualidade');
+                },
               ),
-              label: 'Qualidade',
-              onTap: () {
-                // Ação ao clicar no card de Estoque
-              },
-            ),
-            const SizedBox(height: 32),
-          ],
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
       ),
     );
@@ -403,6 +409,7 @@ class SectorCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const SectorCard({
+    super.key,
     required this.icon,
     required this.label,
     required this.onTap,
