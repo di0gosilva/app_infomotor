@@ -54,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
                 icon: ImageIcon(
                   AssetImage('assets/logo.png'),
                   color: Colors.white,
-                  size: 28, // ajuste o tamanho conforme necessário
+                  size: 26, // ajuste o tamanho conforme necessário
                 ),
                 onPressed: null,
               ),

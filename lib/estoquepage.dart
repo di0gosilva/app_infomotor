@@ -24,22 +24,82 @@ class _EstoquePageState extends State<EstoquePage> {
     });
   }
 
+  FocusNode focusNode = FocusNode();
+
+  void removerFocus() {
+    FocusScope.of(context).unfocus();
+  }
+
   final TextEditingController _idVeiculo = TextEditingController();
   final TextEditingController _modelo = TextEditingController();
   final TextEditingController _quantidade = TextEditingController();
   final TextEditingController _dataEntrada = TextEditingController();
+  final TextEditingController _pesquisa = TextEditingController();
 
   List<Vehicle> veiculos = [];
-  final String _selectedStatus = "Em estoque";
+  List<Vehicle> veiculosFiltrados = [];
+  String? _selectedStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedStatus = "Em estoque";
+    veiculosFiltrados = List.from(veiculos);
+  }
 
   void cadastrarVeiculo() {
     final String idVeiculo = _idVeiculo.text;
     final String modelo = _modelo.text;
     final int quantidade = int.tryParse(_quantidade.text) ?? 0;
-    final String status = _selectedStatus;
+    final String status = _selectedStatus ?? "Em estoque";
     final String dataEntrada = _dataEntrada.text;
 
-    if (idVeiculo.isNotEmpty && modelo.isNotEmpty && dataEntrada.isNotEmpty) {}
+    if (idVeiculo.isNotEmpty && modelo.isNotEmpty && dataEntrada.isNotEmpty) {
+      setState(() {
+        veiculos.add(Vehicle(
+            idVeiculo: idVeiculo,
+            modelo: modelo,
+            quantidade: quantidade,
+            status: status,
+            dataEntrada: dataEntrada));
+      });
+
+      veiculosFiltrados = List.from(veiculos);
+
+      _idVeiculo.clear();
+      _modelo.clear();
+      _quantidade.clear();
+      _dataEntrada.clear();
+      _selectedStatus = "Em estoque";
+
+      _toggleExpand();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Por favor, preencha todos os campos.")));
+    }
+  }
+
+  void removerVeiculo(int index) {
+    setState(() {
+      veiculos.removeAt(index);
+      print("Veículo removido. Veículos restantes: ${veiculos.length}");
+      veiculosFiltrados = List.from(veiculos);
+      print(
+          "Veículo removido. Veículos restantes: ${veiculosFiltrados.length}");
+    });
+  }
+
+  void pesquisarVeiculo(String item) {
+    setState(() {
+      if (item.isEmpty) {
+        veiculosFiltrados = List.from(veiculos);
+      } else {
+        veiculosFiltrados = veiculos
+            .where((veiculo) =>
+                veiculo.modelo.toLowerCase().contains(item.toLowerCase()))
+            .toList();
+      }
+    });
   }
 
   @override
@@ -202,194 +262,235 @@ class _EstoquePageState extends State<EstoquePage> {
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(25, 32, 25, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 33, 33, 33),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Cadastrar Veículo",
-                    style: TextStyle(fontSize: 20, color: Colors.white),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      _isExpanded
-                          ? Icons.close
-                          : Icons.add, // Ícone muda para "close" ao expandir
-                      size: 30,
-                      color: Colors.white,
+      body: GestureDetector(
+        onTap: removerFocus,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(25, 32, 25, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Card Expansível - Cadastrar Veículo
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    vertical: 12.0, horizontal: 16.0),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 33, 33, 33),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Cadastrar Veículo",
+                      style: TextStyle(fontSize: 20, color: Colors.white),
                     ),
-                    onPressed: _toggleExpand,
-                  ),
-                ],
+                    IconButton(
+                      icon: Icon(
+                        _isExpanded
+                            ? Icons.close
+                            : Icons.add, // Ícone muda para "close" ao expandir
+                        size: 30,
+                        color: Colors.white,
+                      ),
+                      onPressed: _toggleExpand,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              height: _isExpanded
-                  ? 310.0
-                  : 0.0, // Expande para 250 quando _isExpanded é true
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 33, 33, 33),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: SingleChildScrollView(
-                // Adicionado SingleChildScrollView
-                child: _isExpanded
-                    ? Column(
-                        children: [
-                          TextField(
-                            decoration: InputDecoration(
-                              labelText: 'Id. Veículo',
-                              labelStyle: TextStyle(color: Colors.white),
-                              border: OutlineInputBorder(),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                height: _isExpanded
+                    ? 365.0
+                    : 0.0, // Expande para 250 quando _isExpanded é true
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 33, 33, 33),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: SingleChildScrollView(
+                  child: _isExpanded
+                      ? Column(
+                          children: [
+                            // Campo - Id Veículo
+                            TextField(
+                              controller: _idVeiculo,
+                              decoration: const InputDecoration(
+                                labelText: 'Id. Veículo',
+                                labelStyle: TextStyle(color: Colors.white),
+                                border: OutlineInputBorder(),
+                              ),
+                              style: const TextStyle(color: Colors.white),
                             ),
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          const SizedBox(height: 10),
-                          TextField(
-                            decoration: InputDecoration(
-                              labelText: 'Modelo',
-                              labelStyle: TextStyle(color: Colors.white),
-                              border: OutlineInputBorder(),
+                            const SizedBox(height: 10),
+                            // Campo - Modelo
+                            TextField(
+                              controller: _modelo,
+                              decoration: const InputDecoration(
+                                labelText: 'Modelo',
+                                labelStyle: TextStyle(color: Colors.white),
+                                border: OutlineInputBorder(),
+                              ),
+                              style: const TextStyle(color: Colors.white),
                             ),
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  decoration: InputDecoration(
-                                    labelText: 'Qtd. Estoque',
-                                    labelStyle: TextStyle(color: Colors.white),
-                                    border: OutlineInputBorder(),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  // Campo - Quantidade
+                                  child: TextField(
+                                    controller: _quantidade,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Qtd. Estoque',
+                                      labelStyle:
+                                          TextStyle(color: Colors.white),
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    style: const TextStyle(color: Colors.white),
+                                    keyboardType: TextInputType.number,
                                   ),
-                                  style: TextStyle(color: Colors.white),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  // Campo - Status
+                                  child: DropdownButtonFormField<String>(
+                                    value: _selectedStatus,
+                                    items: <String>[
+                                      "Em estoque",
+                                      "Indisponível"
+                                    ].map((String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
+                                    onChanged: (String? newValue) {
+                                      setState(() {
+                                        _selectedStatus = newValue!;
+                                        print(
+                                            "Selected Status: $_selectedStatus");
+                                      });
+                                    },
+                                    decoration: const InputDecoration(
+                                      labelText: 'Status',
+                                      labelStyle:
+                                          TextStyle(color: Colors.white),
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    dropdownColor:
+                                        const Color.fromARGB(255, 33, 33, 33),
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            // Campo - Data Entrada
+                            TextField(
+                              controller: _dataEntrada,
+                              decoration: const InputDecoration(
+                                labelText: 'Data Entrada',
+                                labelStyle: TextStyle(color: Colors.white),
+                                border: OutlineInputBorder(),
+                              ),
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            const SizedBox(height: 20),
+                            // Button - Cadastrar
+                            ElevatedButton(
+                              onPressed: cadastrarVeiculo,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    const Color.fromARGB(255, 33, 33, 33),
+                                foregroundColor: Colors.white,
+                                side: const BorderSide(color: Colors.white),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32,
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      5), // Ajuste o valor para o desejado
                                 ),
                               ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: DropdownButtonFormField<String>(
-                                  items: <String>['Disponível', 'Indisponível']
-                                      .map((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
-                                  onChanged: (String? newValue) {},
-                                  decoration: InputDecoration(
-                                    labelText: 'Status',
-                                    labelStyle: TextStyle(color: Colors.white),
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  dropdownColor:
-                                      Color.fromARGB(255, 33, 33, 33),
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          TextField(
-                            decoration: InputDecoration(
-                              labelText: 'Data Entrada',
-                              labelStyle: TextStyle(color: Colors.white),
-                              border: OutlineInputBorder(),
-                            ),
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          const SizedBox(height: 10),
-                          ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  const Color.fromARGB(255, 33, 33, 33),
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(color: Colors.white),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 32,
-                                vertical: 16,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                    5), // Ajuste o valor para o desejado
+                              child: const Text(
+                                'Cadastrar',
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.white),
                               ),
                             ),
-                            child: const Text(
-                              'Cadastrar',
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      )
-                    : Container(), // Conteúdo vazio quando o container está fechado
+                          ],
+                        )
+                      : Container(), // Conteúdo vazio quando o container está fechado
+                ),
               ),
-            ),
-            const SizedBox(height: 32),
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 33, 33, 33),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: const Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                      decoration: InputDecoration(
-                        hintText: 'Pesquisar Veículo',
-                        hintStyle: TextStyle(
-                            color: Color.fromARGB(255, 160, 160, 160)),
-                        border: InputBorder.none,
+              const SizedBox(height: 32),
+              // Card Pesquisa - Pesquisar Veículo
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    vertical: 12.0, horizontal: 16.0),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 33, 33, 33),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _pesquisa,
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 20),
+                        decoration: const InputDecoration(
+                          hintText: 'Pesquisar Veículo',
+                          hintStyle: TextStyle(
+                              color: Color.fromARGB(255, 160, 160, 160)),
+                          border: InputBorder.none,
+                        ),
+                        onChanged: (value) {
+                          pesquisarVeiculo(value);
+                        },
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
-                    child: Icon(
-                      Icons.search,
-                      color: Colors.white,
-                      size: 30,
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
+                      child: Icon(
+                        Icons.search,
+                        color: Colors.white,
+                        size: 30,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 32),
-            Expanded(
-              child: ListView.builder(
-                itemCount: 5,
-                itemBuilder: (context, index) {
-                  return VehicleCard(
-                    idVeiculo: "4SFD22",
-                    modelo: "Sedan LX",
-                    dataEntrada: "01/02/2024",
-                    status: index % 2 == 0 ? "Em Estoque" : "Indisponível",
-                    quantidade: index + 1,
-                  );
-                },
+              const SizedBox(height: 32),
+              // Lista de Cards - Veículos
+              Expanded(
+                child: ListView.builder(
+                  itemCount: veiculosFiltrados.length,
+                  itemBuilder: (context, index) {
+                    if (veiculosFiltrados.isEmpty) {
+                      return const Center(
+                          child: Text("Nenhum veículo encontrado"));
+                    }
+                    final veiculo = veiculosFiltrados[index];
+                    return VehicleCard(
+                      idVeiculo: veiculo.idVeiculo,
+                      modelo: veiculo.modelo,
+                      dataEntrada: veiculo.dataEntrada,
+                      status: veiculo.status,
+                      quantidade: veiculo.quantidade,
+                      onDelete: () {
+                        final originalIndex = veiculos.indexOf(veiculo);
+                        removerVeiculo(originalIndex);
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-          ],
+              const SizedBox(
+                height: 12,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -418,6 +519,7 @@ class VehicleCard extends StatelessWidget {
   final String dataEntrada;
   final String status;
   final int quantidade;
+  final VoidCallback onDelete;
 
   const VehicleCard({
     super.key,
@@ -426,6 +528,7 @@ class VehicleCard extends StatelessWidget {
     required this.dataEntrada,
     required this.status,
     required this.quantidade,
+    required this.onDelete,
   });
 
   @override
@@ -440,6 +543,7 @@ class VehicleCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 1° Linha - Id do Veículo + Banner "Em estoque / Insdisponível"
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -449,9 +553,9 @@ class VehicleCard extends StatelessWidget {
               ),
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 decoration: BoxDecoration(
-                  color: status == "Em Estoque" ? Colors.green : Colors.red,
+                  color: quantidade > 0 ? Colors.green : Colors.red,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -462,6 +566,7 @@ class VehicleCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
+          // 2° Linha - Modelo + Qtd + Botões Edit + Delete
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -485,18 +590,19 @@ class VehicleCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.white70),
+                    icon: const Icon(Icons.edit, color: Colors.white),
                     onPressed: () {},
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.white70),
-                    onPressed: () {},
+                    icon: const Icon(Icons.delete, color: Colors.white),
+                    onPressed: onDelete,
                   ),
                 ],
               ),
             ],
           ),
           const SizedBox(height: 8),
+          // 3° Linha - Data de Entrada
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -511,285 +617,3 @@ class VehicleCard extends StatelessWidget {
     );
   }
 }
-
-// import 'package:flutter/material.dart';
-
-// class EstoquePage extends StatefulWidget {
-//   const EstoquePage({super.key});
-
-//   @override
-//   State<EstoquePage> createState() => _EstoquePageState();
-// }
-
-// class _EstoquePageState extends State<EstoquePage> {
-//   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-//   bool _isExpanded = false; // Variável para controlar o estado expandido
-//   int _selectedIndex = 0;
-
-//   void _onItemTapped(int index) {
-//     setState(() {
-//       _selectedIndex = index;
-//     });
-//   }
-
-//   void _toggleExpand() {
-//     setState(() {
-//       _isExpanded = !_isExpanded;
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       key: _scaffoldKey,
-//       appBar: AppBar(
-//         backgroundColor: const Color.fromARGB(255, 20, 20, 20),
-//         title: const Text(
-//           'ESTOQUE',
-//           style: TextStyle(fontSize: 24, color: Colors.white),
-//         ),
-//         centerTitle: true,
-//       ),
-//       body: Padding(
-//         padding: const EdgeInsets.fromLTRB(25, 32, 25, 0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Container(
-//               padding:
-//                   const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-//               decoration: BoxDecoration(
-//                 color: const Color.fromARGB(255, 33, 33, 33),
-//                 borderRadius: BorderRadius.circular(8.0),
-//               ),
-//               child: Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: [
-//                   const Text(
-//                     "Cadastrar Veículo",
-//                     style: TextStyle(fontSize: 20, color: Colors.white),
-//                   ),
-//                   IconButton(
-//                     icon: Icon(
-//                       _isExpanded
-//                           ? Icons.close
-//                           : Icons.add, // Ícone muda para "close" ao expandir
-//                       size: 30,
-//                       color: Colors.white,
-//                     ),
-//                     onPressed: _toggleExpand,
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             AnimatedContainer(
-//               duration: const Duration(milliseconds: 300),
-//               height: _isExpanded
-//                   ? 250.0
-//                   : 0.0, // Expande para 250 quando _isExpanded é true
-//               padding: const EdgeInsets.all(16.0),
-//               decoration: BoxDecoration(
-//                 color: const Color.fromARGB(255, 33, 33, 33),
-//                 borderRadius: BorderRadius.circular(8.0),
-//               ),
-//               child: _isExpanded
-//                   ? Column(
-//                       children: [
-//                         TextField(
-//                           decoration: InputDecoration(
-//                             labelText: 'Id. Veículo',
-//                             labelStyle: TextStyle(color: Colors.white),
-//                             border: OutlineInputBorder(),
-//                           ),
-//                           style: TextStyle(color: Colors.white),
-//                         ),
-//                         const SizedBox(height: 10),
-//                         TextField(
-//                           decoration: InputDecoration(
-//                             labelText: 'Modelo',
-//                             labelStyle: TextStyle(color: Colors.white),
-//                             border: OutlineInputBorder(),
-//                           ),
-//                           style: TextStyle(color: Colors.white),
-//                         ),
-//                         const SizedBox(height: 10),
-//                         Row(
-//                           children: [
-//                             Expanded(
-//                               child: TextField(
-//                                 decoration: InputDecoration(
-//                                   labelText: 'Qtd. Estoque',
-//                                   labelStyle: TextStyle(color: Colors.white),
-//                                   border: OutlineInputBorder(),
-//                                 ),
-//                                 style: TextStyle(color: Colors.white),
-//                               ),
-//                             ),
-//                             const SizedBox(width: 10),
-//                             Expanded(
-//                               child: DropdownButtonFormField<String>(
-//                                 items: <String>['Disponível', 'Indisponível']
-//                                     .map((String value) {
-//                                   return DropdownMenuItem<String>(
-//                                     value: value,
-//                                     child: Text(value),
-//                                   );
-//                                 }).toList(),
-//                                 onChanged: (String? newValue) {},
-//                                 decoration: InputDecoration(
-//                                   labelText: 'Status',
-//                                   labelStyle: TextStyle(color: Colors.white),
-//                                   border: OutlineInputBorder(),
-//                                 ),
-//                                 dropdownColor: Colors.black,
-//                                 style: TextStyle(color: Colors.white),
-//                               ),
-//                             ),
-//                           ],
-//                         ),
-//                         const SizedBox(height: 10),
-//                         TextField(
-//                           decoration: InputDecoration(
-//                             labelText: 'Data Entrada',
-//                             labelStyle: TextStyle(color: Colors.white),
-//                             border: OutlineInputBorder(),
-//                           ),
-//                           style: TextStyle(color: Colors.white),
-//                         ),
-//                         const SizedBox(height: 10),
-//                         ElevatedButton(
-//                           onPressed: () {
-//                             // Ação ao clicar no botão "Cadastrar"
-//                           },
-//                           child: const Text('Cadastrar'),
-//                         ),
-//                       ],
-//                     )
-//                   : Container(), // Conteúdo vazio quando o container está fechado
-//             ),
-//             const SizedBox(height: 32),
-//             Expanded(
-//               child: ListView.builder(
-//                 itemCount: 5,
-//                 itemBuilder: (context, index) {
-//                   return VehicleCard(
-//                     idVeiculo: "4SFD22",
-//                     modelo: "Sedan LX",
-//                     dataEntrada: "01/02/2024",
-//                     status: index % 2 == 0 ? "Em Estoque" : "Indisponível",
-//                     quantidade: index + 1,
-//                   );
-//                 },
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// class VehicleCard extends StatelessWidget {
-//   final String idVeiculo;
-//   final String modelo;
-//   final String dataEntrada;
-//   final String status;
-//   final int quantidade;
-
-//   const VehicleCard({
-//     super.key,
-//     required this.idVeiculo,
-//     required this.modelo,
-//     required this.dataEntrada,
-//     required this.status,
-//     required this.quantidade,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       margin: const EdgeInsets.symmetric(vertical: 8.0),
-//       padding: const EdgeInsets.all(12.0),
-//       decoration: BoxDecoration(
-//         color: const Color.fromARGB(255, 33, 33, 33),
-//         borderRadius: BorderRadius.circular(8.0),
-//       ),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             children: [
-//               Text(
-//                 'ID do Veículo: $idVeiculo',
-//                 style: const TextStyle(color: Colors.white70, fontSize: 12),
-//               ),
-//               Container(
-//                 padding:
-//                     const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-//                 decoration: BoxDecoration(
-//                   color: status == "Em Estoque" ? Colors.green : Colors.red,
-//                   borderRadius: BorderRadius.circular(12),
-//                 ),
-//                 child: Text(
-//                   status,
-//                   style: const TextStyle(color: Colors.white, fontSize: 12),
-//                 ),
-//               ),
-//             ],
-//           ),
-//           const SizedBox(height: 8.0),
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             children: [
-//               Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Text(
-//                     'Modelo: $modelo',
-//                     style: const TextStyle(
-//                       color: Colors.white,
-//                       fontSize: 16,
-//                       fontWeight: FontWeight.bold,
-//                     ),
-//                   ),
-//                   const SizedBox(height: 4.0),
-//                   Text(
-//                     'Data Entrada: $dataEntrada',
-//                     style: const TextStyle(color: Colors.white70, fontSize: 12),
-//                   ),
-//                 ],
-//               ),
-//               Row(
-//                 children: [
-//                   IconButton(
-//                     icon: const Icon(Icons.edit, color: Colors.white70),
-//                     onPressed: () {},
-//                   ),
-//                   IconButton(
-//                     icon: const Icon(Icons.delete, color: Colors.white70),
-//                     onPressed: () {},
-//                   ),
-//                 ],
-//               ),
-//             ],
-//           ),
-//           const SizedBox(height: 8.0),
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.end,
-//             children: [
-//               Text(
-//                 '$quantidade un',
-//                 style: const TextStyle(
-//                   color: Colors.white,
-//                   fontSize: 24,
-//                   fontWeight: FontWeight.bold,
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
