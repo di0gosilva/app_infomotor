@@ -1,3 +1,4 @@
+// Eduardo de Souza
 import 'package:flutter/material.dart';
 
 class ProducaoPage extends StatefulWidget {
@@ -25,7 +26,8 @@ class _ProducaoPageState extends State<ProducaoPage> {
         backgroundColor: const Color.fromARGB(255, 20, 20, 20),
         title: const Text(
           'PRODUÇÃO',
-          style: TextStyle(fontSize: 24, color: Colors.white),
+          style: TextStyle(
+              fontSize: 24, color: Colors.white, fontWeight: FontWeight.w500),
         ),
         centerTitle: true,
         leading: Padding(
@@ -60,12 +62,15 @@ class _ProducaoPageState extends State<ProducaoPage> {
       endDrawer: Drawer(
         backgroundColor: const Color.fromARGB(255, 33, 33, 33),
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(32, 48, 0, 0),
+          padding: const EdgeInsets.fromLTRB(32, 60, 0, 0),
           children: [
             const ListTile(
               title: Text(
                 'INFO MOTOR',
-                style: TextStyle(color: Colors.white, fontSize: 24),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w500),
               ),
               onTap: null,
             ),
@@ -132,21 +137,6 @@ class _ProducaoPageState extends State<ProducaoPage> {
             ListTile(
               contentPadding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
               title: const Text(
-                'Qualidade',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
-              ),
-              selected: _selectedIndex == 1,
-              onTap: () {
-                _onItemTapped(1);
-                Navigator.pushNamed(context, '/qualidade');
-              },
-            ),
-            ListTile(
-              contentPadding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
-              title: const Text(
                 'Funcionários',
                 style: TextStyle(
                     color: Colors.white,
@@ -157,6 +147,21 @@ class _ProducaoPageState extends State<ProducaoPage> {
               onTap: () {
                 _onItemTapped(1);
                 Navigator.pushNamed(context, '/funcionarios');
+              },
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
+              title: const Text(
+                'Sobre nós',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+              ),
+              selected: _selectedIndex == 1,
+              onTap: () {
+                _onItemTapped(1);
+                Navigator.pushNamed(context, '/sobrenos');
               },
             ),
             ListTile(

@@ -1,3 +1,4 @@
+// Autor: Diogo da Silva
 import 'package:flutter/material.dart';
 import 'package:infomotor/estoquepage.dart';
 import 'package:infomotor/funcionariospage.dart';
@@ -5,7 +6,7 @@ import 'package:infomotor/loginpage.dart';
 import 'package:infomotor/manutencaopage.dart';
 import 'package:infomotor/menupage.dart';
 import 'package:infomotor/producaopage.dart';
-import 'package:infomotor/qualidadepage.dart';
+import 'package:infomotor/sobrepage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -26,8 +27,8 @@ class MyApp extends StatelessWidget {
         '/estoque': (context) => const EstoquePage(),
         '/producao': (context) => const ProducaoPage(),
         '/manutencao': (context) => const ManutencaoPage(),
-        '/qualidade': (context) => const QualidadePage(),
         '/funcionarios': (context) => const FuncionariosPage(),
+        '/sobrenos': (context) => const SobrePage(),
       },
       debugShowCheckedModeBanner: false,
     );

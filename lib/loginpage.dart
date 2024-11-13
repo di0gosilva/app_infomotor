@@ -1,3 +1,4 @@
+// Autor: Vinicius Coelho
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -10,8 +11,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   TextEditingController user = TextEditingController();
   TextEditingController password = TextEditingController();
-
-  FocusNode focusNode = FocusNode();
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -61,7 +60,10 @@ class _LoginPageState extends State<LoginPage> {
             ),
             Text(
               "INFO MOTOR",
-              style: TextStyle(color: Colors.white, fontSize: 24),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w500),
             ),
             Padding(
               padding: EdgeInsets.only(right: 0), // Ajusta o padding à direita
@@ -79,104 +81,115 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: GestureDetector(
         onTap: removerFocus,
-        child: Padding(
-          padding: const EdgeInsets.all(25),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Form(
-                key: formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Icon(
-                      Icons.person,
-                      size: 150,
-                      color: Colors.white,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.text,
-                      controller: user,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return "Insira um usuário válido!";
-                        }
-                        return null;
-                      },
-                      decoration: InputDecoration(
-                        labelText: "Matrícula",
-                        labelStyle:
-                            const TextStyle(color: Colors.white, fontSize: 18),
-                        filled: true,
-                        fillColor: const Color.fromARGB(255, 33, 33, 33),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Form(
+                          key: formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Icon(
+                                Icons.person,
+                                size: 150,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(height: 20),
+                              TextFormField(
+                                controller: user,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "Insira um usuário válido!";
+                                  }
+                                  return null;
+                                },
+                                decoration: InputDecoration(
+                                  labelText: "Matrícula",
+                                  labelStyle: const TextStyle(
+                                      color: Colors.white, fontSize: 18),
+                                  filled: true,
+                                  fillColor:
+                                      const Color.fromARGB(255, 33, 33, 33),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 20),
+                              ),
+                              const SizedBox(height: 15),
+                              TextFormField(
+                                controller: password,
+                                obscureText: true,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "Insira uma senha válida!";
+                                  }
+                                  return null;
+                                },
+                                decoration: InputDecoration(
+                                  labelText: "Senha",
+                                  labelStyle: const TextStyle(
+                                      color: Colors.white, fontSize: 18),
+                                  filled: true,
+                                  fillColor:
+                                      const Color.fromARGB(255, 33, 33, 33),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 20),
+                              ),
+                              const SizedBox(height: 15),
+                              TextButton(
+                                onPressed: () {
+                                  if (formKey.currentState!.validate()) {
+                                    validarLogin();
+                                  }
+                                },
+                                style: TextButton.styleFrom(
+                                    backgroundColor:
+                                        const Color.fromARGB(255, 33, 33, 33),
+                                    fixedSize: const Size(0, 60),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10))),
+                                child: const Text(
+                                  "Entrar",
+                                  style: TextStyle(
+                                      fontSize: 20, color: Colors.white),
+                                ),
+                              ),
+                              const SizedBox(height: 30),
+                              Text(
+                                result,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    fontSize: 24, color: Colors.white),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      style: const TextStyle(color: Colors.white, fontSize: 20),
+                      ],
                     ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.visiblePassword,
-                      obscureText: true,
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      controller: password,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return "Insira uma senha válida!";
-                        }
-                        return null;
-                      },
-                      decoration: InputDecoration(
-                        labelText: "Senha",
-                        labelStyle:
-                            const TextStyle(color: Colors.white, fontSize: 18),
-                        filled: true,
-                        fillColor: const Color.fromARGB(255, 33, 33, 33),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      style: const TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        if (formKey.currentState!.validate()) {
-                          validarLogin();
-                        }
-                      },
-                      style: TextButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromARGB(255, 33, 33, 33),
-                          fixedSize: const Size(0, 60),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10))),
-                      child: const Text(
-                        "Entrar",
-                        style: TextStyle(fontSize: 20, color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    Text(
-                      result,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 24, color: Colors.white),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

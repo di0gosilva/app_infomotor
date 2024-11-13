@@ -1,4 +1,7 @@
+// Autor: Diogo da Silva
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'postgres.dart';
 
 class EstoquePage extends StatefulWidget {
   const EstoquePage({super.key});
@@ -9,6 +12,7 @@ class EstoquePage extends StatefulWidget {
 
 class _EstoquePageState extends State<EstoquePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final db = DatabaseFile();
 
   int _selectedIndex = 0;
   void _onItemTapped(int index) {
@@ -43,8 +47,12 @@ class _EstoquePageState extends State<EstoquePage> {
   @override
   void initState() {
     super.initState();
+    iniciaDatabase().then((_) => fetchVeiculos());
     _selectedStatus = "Em estoque";
-    veiculosFiltrados = List.from(veiculos);
+  }
+
+  Future<void> iniciaDatabase() async {
+    await db.connectToDatabase();
   }
 
   void cadastrarVeiculo() {
@@ -52,16 +60,19 @@ class _EstoquePageState extends State<EstoquePage> {
     final String modelo = _modelo.text;
     final int quantidade = int.tryParse(_quantidade.text) ?? 0;
     final String status = _selectedStatus ?? "Em estoque";
-    final String dataEntrada = _dataEntrada.text;
+    final DateTime dataEntrada =
+        DateFormat("dd/MM/yyyy").parse(_dataEntrada.text);
 
-    if (idVeiculo.isNotEmpty && modelo.isNotEmpty && dataEntrada.isNotEmpty) {
+    if (idVeiculo.isNotEmpty && modelo.isNotEmpty && quantidade >= 0) {
+      createVeiculo(idVeiculo, modelo, quantidade, status, dataEntrada);
+
       setState(() {
         veiculos.add(Vehicle(
             idVeiculo: idVeiculo,
             modelo: modelo,
             quantidade: quantidade,
             status: status,
-            dataEntrada: dataEntrada));
+            dataEntrada: dataEntrada.toIso8601String()));
       });
 
       veiculosFiltrados = List.from(veiculos);
@@ -79,14 +90,64 @@ class _EstoquePageState extends State<EstoquePage> {
     }
   }
 
-  void removerVeiculo(int index) {
-    setState(() {
-      veiculos.removeAt(index);
-      print("Veículo removido. Veículos restantes: ${veiculos.length}");
-      veiculosFiltrados = List.from(veiculos);
-      print(
-          "Veículo removido. Veículos restantes: ${veiculosFiltrados.length}");
+  Future<void> fetchVeiculos() async {
+    try {
+      final veiculosData = await getVeiculos();
+      setState(() {
+        veiculos = veiculosData; // Atualize a lista original
+        veiculosFiltrados = List.from(veiculos); // Copie para a lista filtrada
+      });
+    } catch (e, stackTrace) {
+      print("Erro ao buscar veículos: $e");
+      print("Stack trace: $stackTrace");
+    }
+  }
+
+  Future<List<Vehicle>> getVeiculos() async {
+    try {
+      final List<Map<String, Map<String, dynamic>>> results =
+          await db.readData('veiculo');
+
+      // Imprimir os resultados do banco
+      print("Resultado do banco de dados: $results");
+
+      return results.map((row) {
+        return Vehicle.fromMap(row['veiculo']!);
+      }).toList();
+    } catch (e) {
+      print("Erro ao recuperar os veículos: $e");
+      return [];
+    }
+  }
+
+  void createVeiculo(String idVeiculo, String modelo, int quantidade,
+      String status, DateTime dataEntrada) async {
+    await db.createData('veiculo', {
+      'id_veiculo': idVeiculo,
+      'modelo': modelo,
+      'quantidade': quantidade,
+      'status': status,
+      'data_entrada': dataEntrada,
     });
+  }
+
+  void removerVeiculo(int index) async {
+    final veiculo = veiculos[index];
+    final idVeiculo = veiculo.idVeiculo;
+    try {
+      await db.deleteData(
+          'veiculo', 'id_veiculo = @id_veiculo', {'id_veiculo': idVeiculo});
+
+      setState(() {
+        veiculos.removeAt(index);
+        print("Veículo removido. Veículos restantes: ${veiculos.length}");
+        veiculosFiltrados = List.from(veiculos);
+        print(
+            "Veículo removido. Veículos restantes: ${veiculosFiltrados.length}");
+      });
+    } catch (e) {
+      print("Erro ao excluir veículo do banco de dados: ${e.toString()}");
+    }
   }
 
   void pesquisarVeiculo(String item) {
@@ -110,7 +171,8 @@ class _EstoquePageState extends State<EstoquePage> {
         backgroundColor: const Color.fromARGB(255, 20, 20, 20),
         title: const Text(
           'ESTOQUE',
-          style: TextStyle(fontSize: 24, color: Colors.white),
+          style: TextStyle(
+              fontSize: 24, color: Colors.white, fontWeight: FontWeight.w500),
         ),
         centerTitle: true,
         leading: Padding(
@@ -145,12 +207,15 @@ class _EstoquePageState extends State<EstoquePage> {
       endDrawer: Drawer(
         backgroundColor: const Color.fromARGB(255, 33, 33, 33),
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(32, 48, 0, 0),
+          padding: const EdgeInsets.fromLTRB(32, 60, 0, 0),
           children: [
             const ListTile(
               title: Text(
                 'INFO MOTOR',
-                style: TextStyle(color: Colors.white, fontSize: 24),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w500),
               ),
               onTap: null,
             ),
@@ -217,21 +282,6 @@ class _EstoquePageState extends State<EstoquePage> {
             ListTile(
               contentPadding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
               title: const Text(
-                'Qualidade',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
-              ),
-              selected: _selectedIndex == 1,
-              onTap: () {
-                _onItemTapped(1);
-                Navigator.pushNamed(context, '/qualidade');
-              },
-            ),
-            ListTile(
-              contentPadding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
-              title: const Text(
                 'Funcionários',
                 style: TextStyle(
                     color: Colors.white,
@@ -242,6 +292,21 @@ class _EstoquePageState extends State<EstoquePage> {
               onTap: () {
                 _onItemTapped(1);
                 Navigator.pushNamed(context, '/funcionarios');
+              },
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
+              title: const Text(
+                'Sobre Nós',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+              ),
+              selected: _selectedIndex == 1,
+              onTap: () {
+                _onItemTapped(1);
+                Navigator.pushNamed(context, '/sobrenos');
               },
             ),
             ListTile(
@@ -340,7 +405,7 @@ class _EstoquePageState extends State<EstoquePage> {
                                   child: TextField(
                                     controller: _quantidade,
                                     decoration: const InputDecoration(
-                                      labelText: 'Qtd. Estoque',
+                                      labelText: 'Quantidade',
                                       labelStyle:
                                           TextStyle(color: Colors.white),
                                       border: OutlineInputBorder(),
@@ -393,6 +458,27 @@ class _EstoquePageState extends State<EstoquePage> {
                                 border: OutlineInputBorder(),
                               ),
                               style: const TextStyle(color: Colors.white),
+                              readOnly: true,
+                              onTap: () {
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) async {
+                                  FocusScope.of(context).unfocus();
+                                  DateTime? pickedDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2101),
+                                  );
+                                  if (pickedDate != null) {
+                                    String formattedDate =
+                                        DateFormat('dd/MM/yyyy')
+                                            .format(pickedDate);
+                                    setState(() {
+                                      _dataEntrada.text = formattedDate;
+                                    });
+                                  }
+                                });
+                              },
                             ),
                             const SizedBox(height: 20),
                             // Button - Cadastrar
@@ -464,27 +550,25 @@ class _EstoquePageState extends State<EstoquePage> {
               const SizedBox(height: 32),
               // Lista de Cards - Veículos
               Expanded(
-                child: ListView.builder(
-                  itemCount: veiculosFiltrados.length,
-                  itemBuilder: (context, index) {
-                    if (veiculosFiltrados.isEmpty) {
-                      return const Center(
-                          child: Text("Nenhum veículo encontrado"));
-                    }
-                    final veiculo = veiculosFiltrados[index];
-                    return VehicleCard(
-                      idVeiculo: veiculo.idVeiculo,
-                      modelo: veiculo.modelo,
-                      dataEntrada: veiculo.dataEntrada,
-                      status: veiculo.status,
-                      quantidade: veiculo.quantidade,
-                      onDelete: () {
-                        final originalIndex = veiculos.indexOf(veiculo);
-                        removerVeiculo(originalIndex);
-                      },
-                    );
-                  },
-                ),
+                child: veiculosFiltrados.isEmpty
+                    ? const Center(child: Text("Nenhum veículo encontrado"))
+                    : ListView.builder(
+                        itemCount: veiculosFiltrados.length,
+                        itemBuilder: (context, index) {
+                          final veiculo = veiculosFiltrados[index];
+                          return VehicleCard(
+                            idVeiculo: veiculo.idVeiculo,
+                            modelo: veiculo.modelo,
+                            dataEntrada: veiculo.dataEntrada,
+                            status: veiculo.status,
+                            quantidade: veiculo.quantidade,
+                            onDelete: () {
+                              final originalIndex = veiculos.indexOf(veiculo);
+                              removerVeiculo(originalIndex);
+                            },
+                          );
+                        },
+                      ),
               ),
               const SizedBox(
                 height: 12,
@@ -511,6 +595,19 @@ class Vehicle {
     required this.status,
     required this.dataEntrada,
   });
+
+  factory Vehicle.fromMap(Map<String, dynamic> map) {
+    DateTime data = DateTime.parse(map['data_entrada'].toString());
+    return Vehicle(
+      idVeiculo: map['id_veiculo'].toString(),
+      modelo: map['modelo'] ?? '',
+      quantidade: (map['quantidade'] is int)
+          ? map['quantidade']
+          : int.tryParse(map['quantidade'].toString()) ?? 0,
+      status: map['status'] ?? '',
+      dataEntrada: DateFormat('dd/MM/yyyy').format(data), // Formate aqui
+    );
+  }
 }
 
 class VehicleCard extends StatelessWidget {
@@ -555,7 +652,9 @@ class VehicleCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 decoration: BoxDecoration(
-                  color: quantidade > 0 ? Colors.green : Colors.red,
+                  color: quantidade > 0
+                      ? const Color.fromRGBO(76, 175, 80, 1)
+                      : const Color.fromRGBO(244, 67, 54, 1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(

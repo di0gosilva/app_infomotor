@@ -1,3 +1,4 @@
+// Autor: Guilherme Silva
 import 'package:flutter/material.dart';
 
 class ManutencaoPage extends StatefulWidget {
@@ -25,7 +26,8 @@ class _ManutencaoPageState extends State<ManutencaoPage> {
         backgroundColor: const Color.fromARGB(255, 20, 20, 20),
         title: const Text(
           'MANUTENÇÃO',
-          style: TextStyle(fontSize: 24, color: Colors.white),
+          style: TextStyle(
+              fontSize: 24, color: Colors.white, fontWeight: FontWeight.w500),
         ),
         centerTitle: true,
         leading: Padding(
@@ -60,12 +62,15 @@ class _ManutencaoPageState extends State<ManutencaoPage> {
       endDrawer: Drawer(
         backgroundColor: const Color.fromARGB(255, 33, 33, 33),
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(32, 48, 0, 0),
+          padding: const EdgeInsets.fromLTRB(32, 60, 0, 0),
           children: [
             const ListTile(
               title: Text(
                 'INFO MOTOR',
-                style: TextStyle(color: Colors.white, fontSize: 24),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w500),
               ),
               onTap: null,
             ),
@@ -132,21 +137,6 @@ class _ManutencaoPageState extends State<ManutencaoPage> {
             ListTile(
               contentPadding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
               title: const Text(
-                'Qualidade',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
-              ),
-              selected: _selectedIndex == 1,
-              onTap: () {
-                _onItemTapped(1);
-                Navigator.pushNamed(context, '/qualidade');
-              },
-            ),
-            ListTile(
-              contentPadding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
-              title: const Text(
                 'Funcionários',
                 style: TextStyle(
                     color: Colors.white,
@@ -157,6 +147,21 @@ class _ManutencaoPageState extends State<ManutencaoPage> {
               onTap: () {
                 _onItemTapped(1);
                 Navigator.pushNamed(context, '/funcionarios');
+              },
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
+              title: const Text(
+                'Sobre nós',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+              ),
+              selected: _selectedIndex == 1,
+              onTap: () {
+                _onItemTapped(1);
+                Navigator.pushNamed(context, '/sobrenos');
               },
             ),
             ListTile(
@@ -196,30 +201,25 @@ class _ManutencaoPageState extends State<ManutencaoPage> {
               ),
               const SizedBox(height: 32),
               // Status widgets
-              const StatusCard(
-                title: 'Linha de Montagem',
-                hours: 10,
-                color: Colors.green,
+              Column(
+                children: bracosRoboticos.map((braco) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 32),
+                    child: BracoRobotico(
+                      id: braco.id,
+                      title: braco.title,
+                      hours: braco.hours,
+                      color: braco.color,
+                    ),
+                  );
+                }).toList(),
               ),
-              const SizedBox(height: 32),
-              const StatusCard(
-                title: 'Pintura',
-                hours: 36,
-                color: Colors.green,
-              ),
-              const SizedBox(height: 32),
-              const StatusCard(
-                title: 'Montagem Final',
-                hours: 10,
-                color: Colors.green,
-              ),
-              const SizedBox(height: 32),
               // Report generation section
               const Text(
                 'Gerar Relatório',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 18,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -283,13 +283,33 @@ class _ManutencaoPageState extends State<ManutencaoPage> {
   }
 }
 
-class StatusCard extends StatelessWidget {
+final List<BracoRobotico> bracosRoboticos = [
+  const BracoRobotico(
+      id: '01',
+      title: 'Linha de Montagem',
+      hours: 10,
+      color: Color.fromRGBO(76, 175, 80, 1)),
+  const BracoRobotico(
+      id: '02',
+      title: 'Pintura',
+      hours: 30,
+      color: Color.fromRGBO(76, 175, 80, 1)),
+  const BracoRobotico(
+      id: '03',
+      title: 'Montagem Final',
+      hours: 15,
+      color: Color.fromRGBO(76, 175, 80, 1)),
+];
+
+class BracoRobotico extends StatelessWidget {
+  final String id;
   final String title;
   final int hours;
   final Color color;
 
-  const StatusCard({
+  const BracoRobotico({
     super.key,
+    required this.id,
     required this.title,
     required this.hours,
     required this.color,
